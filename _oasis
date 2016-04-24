@@ -1,0 +1,16 @@
+OASISFormat: 0.4
+Name:        voronoi-digram
+Version:     1.0
+Synopsis:    Voronoi diagram implementation
+Authors:     Alexey Kutepov a.k.a. rexim
+License:     MIT
+Plugins:     META (0.4), DevFiles (0.4)
+
+Executable "voronoi-diagram"
+  Path:       src/
+  BuildTools: ocamlbuild
+  MainIs:     main.ml
+  BuildDepends:
+    graphics,
+    batteries
+  
