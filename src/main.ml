@@ -1,6 +1,4 @@
 open Graphics
-open BatPervasives
-open BatTuple
 
 let window_width = 800
 let window_height = 600
@@ -31,5 +29,12 @@ let draw_voronoi (): unit =
       fill_rect x y 1 1
     done
   done
+
+let draw_point (x, y, _): unit =
+  set_color black;
+  fill_circle x y 5
+
+let draw_points (): unit =
+  List.iter draw_point ps
 
 let _ = ()
