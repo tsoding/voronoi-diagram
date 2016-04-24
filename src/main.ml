@@ -1,4 +1,5 @@
 open Graphics
+open BatSeq
 
 let window_width = 800
 let window_height = 600
@@ -6,9 +7,18 @@ let window_height = 600
 let min_with (f: 'a -> 'b) (a: 'a) (b: 'a): 'a =
   if (f a) < (f b) then a else b
 
-let ps: (int * int * color) list =
-  [(1, 2, blue);
-   (500, 400, green)]
+let generate_point () =
+  (Random.int window_width, Random.int window_height,
+   (rgb (Random.int 255) (Random.int 255) (Random.int 255)))
+
+let generate_ps (n: int): (int * int * color) list =
+  let result = ref [] in
+  for i = 1 to n do
+    result := generate_point () :: !result
+  done;
+  !result
+
+let ps: (int * int * color) list = generate_ps 50
 
 let distance (x1, y1: int * int) (x2, y2: int * int): float =
   let dx = float_of_int (x1 - x2) in
@@ -32,9 +42,14 @@ let draw_voronoi (): unit =
 
 let draw_point (x, y, _): unit =
   set_color black;
-  fill_circle x y 5
+  fill_circle x y 2
 
 let draw_points (): unit =
   List.iter draw_point ps
 
-let _ = ()
+let _ =
+  open_graph "";
+  resize_window window_width window_height;
+  draw_voronoi ();
+  draw_points ();
+  read_key ()
