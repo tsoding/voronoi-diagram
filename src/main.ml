@@ -36,8 +36,9 @@ let draw_voronoi (): unit =
     for x = 0 to window_width - 1 do
       let color = get_color (x, y) in
       set_color color;
-      fill_rect x y 1 1
-    done
+      plot x y
+    done;
+    if y mod 100 == 0 then synchronize ()
   done
 
 let draw_point (x, y, _): unit =
@@ -49,7 +50,9 @@ let draw_points (): unit =
 
 let _ =
   open_graph "";
+  auto_synchronize false;
   resize_window window_width window_height;
   draw_voronoi ();
   draw_points ();
+  synchronize ();
   read_key ()
