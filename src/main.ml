@@ -16,11 +16,7 @@ let generate_point (): point * color =
    (rgb (Random.int 255) (Random.int 255) (Random.int 255)))
 
 let generate_ps (n: int): (point * color) list =
-  let result = ref [] in
-  for i = 1 to n do
-    result := generate_point () :: !result
-  done;
-  !result
+  BatList.Labels.init n (fun _ -> generate_point ())
 
 let ps: (point * color) list = generate_ps amount_of_point
 
