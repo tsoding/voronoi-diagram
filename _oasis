@@ -12,5 +12,5 @@ Executable "voronoi-diagram"
   MainIs:     main.ml
   BuildDepends:
     graphics,
-    batteries
-  
+    batteries,
+    lwt
