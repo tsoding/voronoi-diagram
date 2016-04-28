@@ -12,6 +12,10 @@
 
 ![3-norm](http://i.imgur.com/fl0oT9i.png)
 
+## -1-norm ##
+
+![-1-norm](http://i.imgur.com/wjbPQOg.png)
+
 # License #
 
 Copyright (c) 2016 Alexey Kutepov a.k.a rexim
