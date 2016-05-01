@@ -15,7 +15,7 @@ let future (f:'a -> 'b) (x:'a) : 'b future =
   let (fd_in, fd_out) = pipe () in
   (* function writes result to the output of pipe () *)
   let write_result f =
-    let _ = waitpid [] !(f.pid) in
+    (* let _ = waitpid [] !(f.pid) in *)
     let result : 'b = Marshal.from_channel (in_channel_of_descr fd_in) in
     f.value := Some result in
   match fork () with
