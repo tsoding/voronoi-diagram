@@ -68,8 +68,17 @@ let calc_chunk (distance: distance_function)
   chunk
 
 let draw_voronoi (distance: distance_function): unit =
-  let chunk = calc_chunk distance (0, 0, window_width - 1, window_height - 1) in
-  draw_chunk (0, 0) chunk
+  let half_width = window_width / 2 in
+  let half_height = window_height / 2 in
+  let rects = [0, 0, half_width, half_height;
+               half_width + 1, 0, window_width - 1, half_height;
+               0, half_height + 1, half_width + 1, window_height - 1;
+               half_width + 1, half_height + 1, window_width - 1, window_height - 1] in
+  let chunks = rects |> List.map (fun rect -> future (calc_chunk distance) rect) in
+  chunks
+  |> List.map force
+  |> List.combine rects
+  |> List.iter (fun ((x, y, _, _), chunk) -> draw_chunk (x, y) chunk)
 
 let draw_point ((x, y), _ : point * color): unit =
   set_color black;
