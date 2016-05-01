@@ -1,8 +1,11 @@
 open Graphics
 open BatSeq
+open Future
 
 type point = int * int
+type rect = int * int * int * int
 type distance_function = point -> point -> float
+type chunk = color array array
 
 let window_width = 800
 let window_height = 600
@@ -37,15 +40,36 @@ let get_color (p: point) (distance: distance_function): color =
   |> List.fold_left (min_with fst) (max_float, black)
   |> snd
 
-let draw_voronoi (distance: distance_function): unit =
-  for y = 0 to window_height - 1 do
-    for x = 0 to window_width - 1 do
-      let color = get_color (x, y) distance in
+let draw_chunk (x0, y0: int * int)
+               (chunk: chunk): unit =
+  let h = Array.length chunk in
+  let w = Array.length chunk.(0) in
+  for y = 0 to h - 1 do
+    let row = Array.get chunk y in
+    for x = 0 to w - 1 do
+      let color = Array.get row x in
       set_color color;
-      plot x y
-    done;
-    if y mod 100 == 0 then synchronize ()
+      plot (x + x0) (y + y0)
+    done
   done
+
+let calc_chunk (distance: distance_function)
+               (x0, y0, x1, y1: int * int * int * int): chunk =
+  let w = x1 - x0 + 1 in
+  let h = y1 - y0 + 1 in
+  let chunk = Array.make_matrix h w black in
+  for y = y0 to y1 do
+    let row = Array.get chunk (y - y0) in
+    for x = x0 to x1 do
+      let color = get_color (x, y) distance in
+      Array.set row (x - x0) color
+    done
+  done;
+  chunk
+
+let draw_voronoi (distance: distance_function): unit =
+  let chunk = calc_chunk distance (0, 0, window_width - 1, window_height - 1) in
+  draw_chunk (0, 0) chunk
 
 let draw_point ((x, y), _ : point * color): unit =
   set_color black;
