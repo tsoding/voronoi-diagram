@@ -3,3 +3,4 @@ B _build/src
 PKG graphics
 PKG batteries
 PKG lwt
+PKG threads

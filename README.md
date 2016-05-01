@@ -16,6 +16,10 @@
 
 ![-1-norm](http://i.imgur.com/wjbPQOg.png)
 
+# Thirdparty Components #
+
+- [ocaml-futures]
+
 # License #
 
 Copyright (c) 2016 Alexey Kutepov a.k.a rexim
@@ -38,3 +42,5 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+[ocaml-futures]: https://github.com/crm416/ocaml-futures

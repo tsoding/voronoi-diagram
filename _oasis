@@ -13,4 +13,5 @@ Executable "voronoi-diagram"
   BuildDepends:
     graphics,
     batteries,
-    lwt
+    lwt,
+    threads
