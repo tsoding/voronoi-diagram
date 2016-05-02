@@ -1,4 +1,7 @@
 S src/
 B _build/src
+B +threads
 PKG graphics
 PKG batteries
+PKG lwt
+PKG threads

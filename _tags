@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 7b8c81c4b9248e8476d3a64da6520bb4)
+# DO NOT EDIT (digest: 381bbe87074ff039652772e8f30e06e1)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -17,6 +17,10 @@ true: annot, bin_annot
 # Executable voronoi-diagram
 "src/main.byte": pkg_batteries
 "src/main.byte": pkg_graphics
+"src/main.byte": pkg_lwt
+"src/main.byte": pkg_threads
 <src/*.ml{,i,y}>: pkg_batteries
 <src/*.ml{,i,y}>: pkg_graphics
+<src/*.ml{,i,y}>: pkg_lwt
+<src/*.ml{,i,y}>: pkg_threads
 # OASIS_STOP
