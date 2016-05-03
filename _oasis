@@ -10,6 +10,7 @@ Executable "voronoi-diagram"
   Path:       src/
   BuildTools: ocamlbuild
   MainIs:     main.ml
+  CompiledObject: best
   BuildDepends:
     graphics,
     batteries,
