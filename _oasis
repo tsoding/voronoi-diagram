@@ -9,7 +9,7 @@ Plugins:     META (0.4), DevFiles (0.4)
 Executable "voronoi-diagram"
   Path:       src/
   BuildTools: ocamlbuild
-  MainIs:     main.ml
+  MainIs:     voroMain.ml
   CompiledObject: best
   BuildDepends:
     graphics,
