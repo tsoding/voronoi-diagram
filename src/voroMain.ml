@@ -13,11 +13,9 @@ let amount_of_point = 50
 let min_with (f: 'a -> 'b) (a: 'a) (b: 'a): 'a =
   if (f a) < (f b) then a else b
 
-let generate_ps (n: int): (point * color) list =
-  let rect = (0, 0, window_width - 1, window_height - 1) in
-  BatList.Labels.init n (fun _ -> generate_seed rect)
-
-let ps: (point * color) list = generate_ps amount_of_point
+let ps: (point * color) list =
+  generate_seeds (0, 0, window_width - 1, window_height - 1)
+                 amount_of_point
 
 let get_color (p: point) (distance: distance_function): color =
   ps

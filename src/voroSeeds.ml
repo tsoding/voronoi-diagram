@@ -11,3 +11,6 @@ let generate_random_color (): color =
 let generate_seed (rect: rect): seed =
   (generate_random_point rect,
    generate_random_color ())
+
+let generate_seeds (rect: rect) (n: int): seed list =
+  BatList.Labels.init n (fun _ -> generate_seed rect)
