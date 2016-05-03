@@ -16,6 +16,10 @@
 
 ![-1-norm](http://i.imgur.com/wjbPQOg.png)
 
+# Usage #
+
+    $ ./voroMain.native [pnorm]
+
 # Thirdparty Components #
 
 - [ocaml-futures]
