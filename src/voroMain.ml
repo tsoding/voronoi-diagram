@@ -62,10 +62,13 @@ let draw_points (): unit =
   List.iter draw_point seeds
 
 let _ =
+  let p = (match Array.to_list Sys.argv with
+           | _ :: valueOfP :: _ -> int_of_string valueOfP
+           | _ -> 2) in
   open_graph "";
   auto_synchronize false;
   resize_window window_width window_height;
-  draw_voronoi @@ taxicab_distance;
+  draw_voronoi @@ pnorm_distance p;
   draw_points ();
   synchronize ();
   read_key ()
