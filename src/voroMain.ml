@@ -10,18 +10,9 @@ let window_width = 800
 let window_height = 600
 let amount_of_point = 50
 
-let min_with (f: 'a -> 'b) (a: 'a) (b: 'a): 'a =
-  if (f a) < (f b) then a else b
-
-let ps: (point * color) list =
+let seeds: seed list =
   generate_seeds (0, 0, window_width - 1, window_height - 1)
                  amount_of_point
-
-let get_color (p: point) (distance: distance_function): color =
-  ps
-  |> List.map (fun ((x, y), color) -> (distance p (x, y), color))
-  |> List.fold_left (min_with fst) (max_float, black)
-  |> snd
 
 let draw_chunk (x0, y0: int * int)
                (chunk: chunk): unit =
@@ -44,7 +35,7 @@ let calc_chunk (distance: distance_function)
   for y = y0 to y1 do
     let row = Array.get chunk (y - y0) in
     for x = x0 to x1 do
-      let color = get_color (x, y) distance in
+      let color = get_color seeds (x, y) distance in
       Array.set row (x - x0) color
     done
   done;
@@ -68,7 +59,7 @@ let draw_point ((x, y), _ : point * color): unit =
   fill_circle x y 2
 
 let draw_points (): unit =
-  List.iter draw_point ps
+  List.iter draw_point seeds
 
 let _ =
   open_graph "";
