@@ -14,3 +14,9 @@ let pnorm_distance (p: int)
 let euclidean_distance: distance_function = pnorm_distance 2
 
 let taxicab_distance: distance_function = pnorm_distance 1
+
+let generate_random_point (x0, y0, x1, y1: rect): point =
+  let width = x1 - x0 + 1 in
+  let height = y1 - y0 + 1 in
+  (x0 + Random.int width,
+   y0 + Random.int height)
