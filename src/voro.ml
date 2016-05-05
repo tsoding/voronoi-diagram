@@ -3,6 +3,11 @@ open Future
 open VoroGeo
 open VoroSeeds
 
+module Future4 = Future.Make(struct
+                              let process_limit = 4
+                            end)
+open Future4
+
 type chunk = color array array
 
 let window_width = 800
