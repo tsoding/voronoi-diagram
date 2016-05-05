@@ -18,7 +18,8 @@
 
 # Usage #
 
-    $ ./voroMain.native [pnorm]
+    $ oasis setup -setup-update dynamic
+    $ ./voro.native [pnorm]
 
 # Thirdparty Components #
 

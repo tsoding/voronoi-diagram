@@ -58,6 +58,8 @@ flycheck_*.el
 
 # ocamlbuild working directory
 _build/
+_tags
+myocamlbuild.ml
 
 # ocamlbuild targets
 *.byte

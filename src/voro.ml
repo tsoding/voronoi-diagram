@@ -1,5 +1,4 @@
 open Graphics
-open BatSeq
 open Future
 open VoroGeo
 open VoroSeeds
