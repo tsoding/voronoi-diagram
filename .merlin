@@ -1,6 +1,8 @@
 S src/
 B _build/src
 B +threads
+PKG core
+PKG async_unix
 PKG graphics
 PKG batteries
 PKG lwt

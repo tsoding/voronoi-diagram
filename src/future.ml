@@ -1,6 +1,7 @@
 open Unix;;
 open Sys;;
 open Marshal;;
+open Async_unix.Thread_pool
 
 module type FutureConfig =
   sig

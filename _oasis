@@ -15,4 +15,6 @@ Executable "voronoi-diagram"
     graphics,
     batteries,
     lwt,
-    threads
+    threads,
+    core,
+    async_unix
