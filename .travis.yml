@@ -3,6 +3,7 @@ sudo: required
 install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-ocaml.sh
 script:
   - bash -ex .travis-ocaml.sh
+  - cp ./dot_ocamlinit $HOME/.ocamlinit
   - opam install -y oasis
   - make
 env:
