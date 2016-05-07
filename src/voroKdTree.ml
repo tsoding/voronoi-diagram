@@ -11,7 +11,18 @@ type kdtree = kdnode
 
 let k = 2
 
+let split_rect_vert (x, y: point) (rx, ry, w, h: rect): rect * rect =
+  let lw = abs (rx - x) in
+  ((rx, ry, lw, h),
+   (x, ry, w - lw, h))
+
+let split_rect_hor ((x, y): point) ((rx, ry, w, h): rect): rect * rect =
+  let lh = abs (ry - y) in
+  ((rx, ry, w, lh),
+   (rx, y, w, h - lh))
+
 let accessors : ('a * 'a -> 'a) array = [|fst; snd|]
+let splitters : (point -> rect -> rect * rect ) array = [|split_rect_vert; split_rect_hor|]
 
 let compare_with (f: 'a -> 'b) (a: 'a) (b: 'a): int =
   compare (f a) (f b)
@@ -54,5 +65,25 @@ let print_tree (tree: kdtree): unit =
     | KdNil -> ()
   in
   print_tree_impl tree 0
+
+
+let draw_tree (tree: kdtree): unit =
+  let width = size_x () in
+  let height = size_y () in
+  let rec draw_tree_impl (node: kdnode) (rx, ry, w, h: rect) (depth: int): unit =
+    match node with
+    | KdNode ((pivot, _), left, right) ->
+       Graphics.set_color Graphics.black;
+       Graphics.draw_rect rx ry w h;
+       let axis = depth mod k in
+       let splitter = splitters.(axis) in
+       let (left_rect, right_rect) = splitter pivot (rx, ry, w, h) in
+       draw_tree_impl left left_rect (depth + 1);
+       draw_tree_impl right right_rect (depth + 1)
+    | KdNil ->
+       Graphics.set_color Graphics.black;
+       Graphics.draw_rect rx ry w h
+  in
+  draw_tree_impl tree (0, 0, width, height) 0
 
 let search_near_point (point: point) (tree: kdtree): color option = None
