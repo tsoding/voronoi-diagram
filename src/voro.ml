@@ -12,7 +12,7 @@ type chunk = color array array
 
 let window_width = 800
 let window_height = 600
-let amount_of_point = 50
+let amount_of_point = 100
 
 let seeds: seed list =
   generate_seeds (0, 0, window_width - 1, window_height - 1)
@@ -73,6 +73,8 @@ let _ =
   auto_synchronize false;
   resize_window window_width window_height;
   draw_voronoi @@ pnorm_distance p;
+  let tree = VoroKdTree.build seeds in
+  VoroKdTree.draw_tree tree;
   draw_points ();
   synchronize ();
   read_key ()
