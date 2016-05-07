@@ -4,6 +4,7 @@ install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.t
 script:
   - bash -ex .travis-ocaml.sh
   - opam install -y oasis
+  - make
 env:
   - OCAML_VERSION=4.02
 os:
