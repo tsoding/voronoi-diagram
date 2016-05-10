@@ -22,6 +22,9 @@ let split_rect_hor ((x, y): point) ((rx, ry, w, h): rect): rect * rect =
    (rx, y, w, h - lh))
 
 let accessors : ('a * 'a -> 'a) array = [|fst; snd|]
+let hyperpivot : (point -> point -> point) array =
+  [| (fun (sx, sy) (px, py) -> px, sy);
+     (fun (sx, sy) (px, py) -> sx, py) |]
 let splitters : (point -> rect -> rect * rect ) array = [|split_rect_vert; split_rect_hor|]
 
 let compare_with (f: 'a -> 'b) (a: 'a) (b: 'a): int =
@@ -86,4 +89,29 @@ let draw_tree (tree: kdtree): unit =
   in
   draw_tree_impl tree (0, 0, width, height) 0
 
-let search_near_point (point: point) (tree: kdtree): color option = None
+let search_near_point (point: point) (tree: kdtree): color option =
+  let rec search_near_point_impl (node: kdnode) (depth: int): seed option =
+    match node with
+    | KdNode ((pivot, _), left, right) ->
+       let best_result = search_near_point_impl left (depth + 1) in
+       (match best_result with
+        | Some (best_point, best_color) ->
+           let axis = depth mod k in
+           let best_distance = VoroGeo.euclidean_distance point best_point in
+           let pivot_distance = VoroGeo.euclidean_distance point (hyperpivot.(axis) point pivot) in
+           if pivot_distance < best_distance
+           then let best_right_result = search_near_point_impl right (depth + 1) in
+                (match (best_result, best_right_result) with
+                 | (Some l, Some r) -> let left_distance = VoroGeo.euclidean_distance point (fst l) in
+                                       let right_distance = VoroGeo.euclidean_distance point (fst r) in
+                                       if left_distance < right_distance
+                                       then Some l
+                                       else Some r
+                 | (Some l, None) -> Some l
+                 | (None, Some r) -> Some r
+                 | _ -> None)
+           else best_result
+        | None -> None)
+    | KdNil -> None
+  in
+  BatOption.map snd (search_near_point_impl tree 0)
