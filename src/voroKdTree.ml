@@ -22,6 +22,9 @@ let split_rect_hor ((x, y): point) ((rx, ry, w, h): rect): rect * rect =
    (rx, y, w, h - lh))
 
 let accessors : ('a * 'a -> 'a) array = [|fst; snd|]
+let hyperpivot : (point -> point -> point) array =
+  [| (fun (sx, sy) (px, py) -> px, sy);
+     (fun (sx, sy) (px, py) -> sx, py) |]
 let splitters : (point -> rect -> rect * rect ) array = [|split_rect_vert; split_rect_hor|]
 
 let compare_with (f: 'a -> 'b) (a: 'a) (b: 'a): int =
@@ -86,4 +89,24 @@ let draw_tree (tree: kdtree): unit =
   in
   draw_tree_impl tree (0, 0, width, height) 0
 
-let search_near_point (point: point) (tree: kdtree): color option = None
+let search_near_point (search_point: point) (tree: kdtree): color option =
+  let rec search_near_point_impl (node: kdnode) (depth: int): seed option =
+    match node with
+    | KdNode ((pivot_point, pivot_color), left, right) ->
+       let axis = depth mod k in
+       let search_axis = accessors.(axis) search_point in
+       let pivot_axis = accessors.(axis) pivot_point in
+       let next_branch = if search_axis < pivot_axis
+                         then left
+                         else right in
+       (match search_near_point_impl next_branch (depth + 1) with
+        | Some (best_point, best_color) ->
+           let best_distance = VoroGeo.euclidean_distance search_point best_point in
+           let current_distance = VoroGeo.euclidean_distance search_point pivot_point in
+           if best_distance > current_distance
+           then Some (pivot_point, pivot_color)
+           else Some (best_point, best_color)
+        | None -> Some (pivot_point, pivot_color))
+    | KdNil -> None
+  in
+  BatOption.map snd (search_near_point_impl tree 0)
