@@ -3,6 +3,20 @@ open Future
 open VoroGeo
 open VoroSeeds
 
+module Element2D =
+  struct
+    type elt = int * int
+    type dem = int
+    let k = 2
+    let axis_get (elt: elt) (idx: int): dem =
+      match idx with
+      | 0 -> fst elt
+      | 1 -> snd elt
+      | _ -> failwith "Khooy"
+    let compare = Pervasives.compare
+  end
+
+module Voro2dTree = VoroKdTree.Make(Element2D)
 module Future4 = Future.Make(struct
                               let process_limit = 4
                             end)
@@ -19,8 +33,8 @@ let seeds: seed list =
                    size = (window_width, window_height) }
                  amount_of_point
 
-let seedsTree: VoroKdTree.kdtree =
-  VoroKdTree.build seeds
+let seedsTree: Voro2dTree.kdtree =
+  Voro2dTree.build seeds
 
 let draw_chunk (x0, y0: int * int)
                (chunk: chunk): unit =
@@ -44,7 +58,7 @@ let calc_chunk (distance: distance_function)
     let row = Array.get chunk (y - y0) in
     for x = x0 to x1 do
       let color =
-        match VoroKdTree.search_near_point (x, y) seedsTree with
+        match Voro2dTree.search_near_point (x, y) seedsTree with
         | Some color -> color
         | None -> black
       in
@@ -81,7 +95,7 @@ let _ =
   auto_synchronize false;
   resize_window window_width window_height;
   draw_voronoi @@ pnorm_distance p;
-  VoroKdTree.draw_tree seedsTree;
+  Voro2dTree.draw_tree seedsTree;
   draw_points ();
   synchronize ();
   read_key ()
