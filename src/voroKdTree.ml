@@ -89,29 +89,24 @@ let draw_tree (tree: kdtree): unit =
   in
   draw_tree_impl tree (0, 0, width, height) 0
 
-let search_near_point (point: point) (tree: kdtree): color option =
+let search_near_point (search_point: point) (tree: kdtree): color option =
   let rec search_near_point_impl (node: kdnode) (depth: int): seed option =
     match node with
-    | KdNode ((pivot, _), left, right) ->
-       let best_result = search_near_point_impl left (depth + 1) in
-       (match best_result with
+    | KdNode ((pivot_point, pivot_color), left, right) ->
+       let axis = depth mod k in
+       let search_axis = accessors.(axis) search_point in
+       let pivot_axis = accessors.(axis) pivot_point in
+       let next_branch = if search_axis < pivot_axis
+                         then left
+                         else right in
+       (match search_near_point_impl next_branch (depth + 1) with
         | Some (best_point, best_color) ->
-           let axis = depth mod k in
-           let best_distance = VoroGeo.euclidean_distance point best_point in
-           let pivot_distance = VoroGeo.euclidean_distance point (hyperpivot.(axis) point pivot) in
-           if pivot_distance < best_distance
-           then let best_right_result = search_near_point_impl right (depth + 1) in
-                (match (best_result, best_right_result) with
-                 | (Some l, Some r) -> let left_distance = VoroGeo.euclidean_distance point (fst l) in
-                                       let right_distance = VoroGeo.euclidean_distance point (fst r) in
-                                       if left_distance < right_distance
-                                       then Some l
-                                       else Some r
-                 | (Some l, None) -> Some l
-                 | (None, Some r) -> Some r
-                 | _ -> None)
-           else best_result
-        | None -> None)
+           let best_distance = VoroGeo.euclidean_distance search_point best_point in
+           let current_distance = VoroGeo.euclidean_distance search_point pivot_point in
+           if best_distance > current_distance
+           then Some (pivot_point, pivot_color)
+           else Some (best_point, best_color)
+        | None -> Some (pivot_point, pivot_color))
     | KdNil -> None
   in
   BatOption.map snd (search_near_point_impl tree 0)
