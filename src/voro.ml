@@ -18,6 +18,9 @@ let seeds: seed list =
   generate_seeds (0, 0, window_width - 1, window_height - 1)
                  amount_of_point
 
+let seedsTree: VoroKdTree.kdtree =
+  VoroKdTree.build seeds
+
 let draw_chunk (x0, y0: int * int)
                (chunk: chunk): unit =
   let h = Array.length chunk in
@@ -39,7 +42,11 @@ let calc_chunk (distance: distance_function)
   for y = y0 to y1 do
     let row = Array.get chunk (y - y0) in
     for x = x0 to x1 do
-      let color = get_color seeds (x, y) distance in
+      let color =
+        match VoroKdTree.search_near_point (x, y) seedsTree with
+        | Some color -> color
+        | None -> black
+      in
       Array.set row (x - x0) color
     done
   done;
@@ -73,8 +80,7 @@ let _ =
   auto_synchronize false;
   resize_window window_width window_height;
   draw_voronoi @@ pnorm_distance p;
-  let tree = VoroKdTree.build seeds in
-  VoroKdTree.draw_tree tree;
+  VoroKdTree.draw_tree seedsTree;
   draw_points ();
   synchronize ();
   read_key ()
