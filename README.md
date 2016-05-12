@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/tsoding/voronoi-diagram.png?label=ready&title=Ready)](https://waffle.io/tsoding/voronoi-diagram)
 [![Build Status](https://travis-ci.org/tsoding/voronoi-diagram.svg?branch=master)](https://travis-ci.org/tsoding/voronoi-diagram)
 
 # Voronoi Diagram #
