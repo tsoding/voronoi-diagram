@@ -15,7 +15,8 @@ let window_height = 600
 let amount_of_point = 100
 
 let seeds: seed list =
-  generate_seeds (0, 0, window_width - 1, window_height - 1)
+  generate_seeds { position = (0, 0);
+                   size = (window_width, window_height) }
                  amount_of_point
 
 let seedsTree: VoroKdTree.kdtree =

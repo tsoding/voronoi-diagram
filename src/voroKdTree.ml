@@ -11,15 +11,23 @@ type kdtree = kdnode
 
 let k = 2
 
-let split_rect_vert (x, y: point) (rx, ry, w, h: rect): rect * rect =
+let split_rect_vert (x, y: point) {position; size}: rect * rect =
+  let rx, ry = position in
+  let w, h = size in
   let lw = abs (rx - x) in
-  ((rx, ry, lw, h),
-   (x, ry, w - lw, h))
+  ({ position = (rx, ry);
+     size = (lw, h) },
+   { position = (x, ry);
+     size = (w - lw, h) })
 
-let split_rect_hor ((x, y): point) ((rx, ry, w, h): rect): rect * rect =
+let split_rect_hor (x, y: point) {position; size}: rect * rect =
+  let rx, ry = position in
+  let w, h = size in
   let lh = abs (ry - y) in
-  ((rx, ry, w, lh),
-   (rx, y, w, h - lh))
+  ({ position = (rx, ry);
+     size = (w, lh) },
+   { position = (rx, y);
+     size = (w, h - lh) })
 
 let accessors : ('a * 'a -> 'a) array = [|fst; snd|]
 let hyperpivot : (point -> point -> point) array =
@@ -73,21 +81,23 @@ let print_tree (tree: kdtree): unit =
 let draw_tree (tree: kdtree): unit =
   let width = size_x () in
   let height = size_y () in
-  let rec draw_tree_impl (node: kdnode) (rx, ry, w, h: rect) (depth: int): unit =
+  let rec draw_tree_impl (node: kdnode) {position; size} (depth: int): unit =
+    let rx, ry = position in
+    let w, h = size in
     match node with
     | KdNode ((pivot, _), left, right) ->
        Graphics.set_color Graphics.black;
        Graphics.draw_rect rx ry w h;
        let axis = depth mod k in
        let splitter = splitters.(axis) in
-       let (left_rect, right_rect) = splitter pivot (rx, ry, w, h) in
+       let (left_rect, right_rect) = splitter pivot @@ make_rect rx ry w h in
        draw_tree_impl left left_rect (depth + 1);
        draw_tree_impl right right_rect (depth + 1)
     | KdNil ->
        Graphics.set_color Graphics.black;
        Graphics.draw_rect rx ry w h
   in
-  draw_tree_impl tree (0, 0, width, height) 0
+  draw_tree_impl tree (make_rect 0 0 width height) 0
 
 let search_near_point (search_point: point) (tree: kdtree): color option =
   let rec search_near_point_impl (node: kdnode) (depth: int): seed option =
