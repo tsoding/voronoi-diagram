@@ -5,3 +5,4 @@ PKG graphics
 PKG batteries
 PKG lwt
 PKG threads
+PKG oUnit
