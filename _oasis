@@ -5,13 +5,24 @@ Synopsis:    Voronoi diagram implementation
 Authors:     Alexey Kutepov a.k.a. rexim
 License:     MIT
 Plugins:     META (0.4), DevFiles (0.4)
+BuildTools: ocamlbuild
 
-Executable "voronoi-diagram"
+Executable voro
   Path:       src/
-  BuildTools: ocamlbuild
   MainIs:     voro.ml
   CompiledObject: best
   BuildDepends:
     graphics,
     batteries,
     threads
+
+Executable voro_test_runner
+  Path: src/
+  MainIs: voro_test_runner.ml
+  CompiledObject: best
+  BuildDepends:
+    oUnit
+
+Test voro_test
+  Command: $voro_test_runner
+  TestTools: voro_test_runner

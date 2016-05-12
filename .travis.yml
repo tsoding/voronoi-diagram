@@ -5,7 +5,9 @@ script:
   - bash -ex .travis-ocaml.sh
   - opam install -y oasis batteries
   - eval `opam config env`
+  - ./configure --enable-tests
   - make
+  - make test
 env:
   - OCAML_VERSION=4.02
 os:
