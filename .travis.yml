@@ -2,9 +2,9 @@ language: c
 sudo: required
 install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-ocaml.sh
 script:
-  - export OCAML_TOPLEVEL_PATH="$HOME/.opam/$OCAML_VERSION/lib/toplevel"
   - bash -ex .travis-ocaml.sh
   - opam install -y oasis
+  - eval `opam config env`
   - make
 env:
   - OCAML_VERSION=4.02
