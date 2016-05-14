@@ -2,12 +2,22 @@ open Graphics
 open VoroGeo
 open VoroSeeds
 
-type kdtree
+module type ElementType =
+  sig
+    type elt
+    type dem
+    val k: int
+    val axis_get: elt -> int -> dem
+    val compare: dem -> dem -> int
+  end
 
-val build : seed list -> kdtree
+module type Kd =
+  sig
+    type kdtree
+    val build : seed list -> kdtree
+    val search_near_point : point -> kdtree -> color option
+    val print_tree : kdtree -> unit
+    val draw_tree : kdtree -> unit
+  end
 
-val search_near_point : point -> kdtree -> color option
-
-val print_tree : kdtree -> unit
-
-val draw_tree : kdtree -> unit
+module Make(Elt: ElementType): Kd
