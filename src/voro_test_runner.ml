@@ -16,13 +16,22 @@ let assert_rects_equal (rect1: rect) (rect2: rect): unit =
   assert_equal (snd rect1.size) (snd rect2.size)
 
 let test_split_rect_vert test_ctxt =
+  let input_pivot = (3, 2) in
   let input_rect = make_rect 0 0 10 5 in
   let (expected_rect1, expected_rect2) = (make_rect 0 0 3 5,
                                          make_rect 3 0 7 5) in
-  let (actual_rect1, actual_rect2) = split_rect_vert (3, 2) input_rect in
+  let (actual_rect1, actual_rect2) = split_rect_vert input_pivot input_rect in
   assert_rects_equal actual_rect1 expected_rect1;
   assert_rects_equal actual_rect2 expected_rect2
 
+let test_split_rect_hor test_ctxt =
+  let input_pivot = (3, 2) in
+  let input_rect = make_rect 0 0 10 5 in
+  let (expected_rect1, expected_rect2) = (make_rect 0 0 10 2,
+                                          make_rect 0 2 10 3) in
+  let (actual_rect1, actual_rect2) = split_rect_hor input_pivot input_rect in
+  assert_rects_equal actual_rect1 expected_rect1;
+  assert_rects_equal actual_rect2 expected_rect2
 
 (* Name the test cases and group them together *)
 
@@ -30,6 +39,7 @@ let suite =
   "suite">:::
  ["test1">:: test1;
   "test2">:: test2;
-  "test_split_rect_vert" >:: test_split_rect_vert]
+  "test_split_rect_vert" >:: test_split_rect_vert;
+  "test_split_rect_hor" >:: test_split_rect_hor]
 
 let () = run_test_tt_main suite
