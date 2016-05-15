@@ -122,9 +122,25 @@ module Make(Elt: ElementType): Kd =
              then (left, right)
              else (right, left)
            in
-           (match search_near_point_impl next_branch (depth + 1) with
-            | Some best_seed -> Some (closer_seed search_point best_seed pivot_seed)
-            | None -> Some (pivot_point, pivot_color))
+           let best_point, _ as best_seed =
+             search_near_point_impl next_branch (depth + 1)
+             |> BatOption.map @@ (closer_seed search_point pivot_seed)
+             |> BatOption.default pivot_seed
+           in
+
+           let hyperpivot_point = hyperpivot.(axis) search_point pivot_point in
+           let hyperpivot_distance = VoroGeo.euclidean_distance search_point hyperpivot_point in
+           let best_distance = VoroGeo.euclidean_distance search_point best_point in
+           let probably_better_seed = if hyperpivot_distance < best_distance
+                                      then search_near_point_impl opposite_branch (depth + 1)
+                                      else None in
+
+           let result_seed = probably_better_seed
+                             |> BatOption.map (closer_seed search_point best_seed)
+                             |> BatOption.default best_seed
+           in
+
+           Some result_seed
         | KdNil -> None
       in
       BatOption.map snd (search_near_point_impl tree 0)
