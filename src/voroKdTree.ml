@@ -101,24 +101,46 @@ module Make(Elt: ElementType): Kd =
       in
       draw_tree_impl tree (make_rect 0 0 width height) 0
 
+    let closer_seed (search_point: point)
+                    (seed1_point, _ as seed1: seed)
+                    (seed2_point, _ as seed2: seed): seed =
+      let seed1_distance = VoroGeo.euclidean_distance search_point seed1_point in
+      let seed2_distance = VoroGeo.euclidean_distance search_point seed2_point in
+      if seed1_distance < seed2_distance
+      then seed1
+      else seed2
+
     let search_near_point (search_point: point) (tree: kdtree): color option =
       let rec search_near_point_impl (node: kdnode) (depth: int): seed option =
         match node with
-        | KdNode ((pivot_point, pivot_color), left, right) ->
+        | KdNode ((pivot_point, pivot_color) as pivot_seed, left, right) ->
            let axis = depth mod k in
            let search_axis = accessors.(axis) search_point in
            let pivot_axis = accessors.(axis) pivot_point in
-           let next_branch = if search_axis < pivot_axis
-                             then left
-                             else right in
-           (match search_near_point_impl next_branch (depth + 1) with
-            | Some (best_point, best_color) ->
-               let best_distance = VoroGeo.euclidean_distance search_point best_point in
-               let current_distance = VoroGeo.euclidean_distance search_point pivot_point in
-               if best_distance > current_distance
-               then Some (pivot_point, pivot_color)
-               else Some (best_point, best_color)
-            | None -> Some (pivot_point, pivot_color))
+           let (next_branch, opposite_branch) =
+             if search_axis < pivot_axis
+             then (left, right)
+             else (right, left)
+           in
+           let best_point, _ as best_seed =
+             search_near_point_impl next_branch (depth + 1)
+             |> BatOption.map @@ (closer_seed search_point pivot_seed)
+             |> BatOption.default pivot_seed
+           in
+
+           let hyperpivot_point = hyperpivot.(axis) search_point pivot_point in
+           let hyperpivot_distance = VoroGeo.euclidean_distance search_point hyperpivot_point in
+           let best_distance = VoroGeo.euclidean_distance search_point best_point in
+           let probably_better_seed = if hyperpivot_distance < best_distance
+                                      then search_near_point_impl opposite_branch (depth + 1)
+                                      else None in
+
+           let result_seed = probably_better_seed
+                             |> BatOption.map (closer_seed search_point best_seed)
+                             |> BatOption.default best_seed
+           in
+
+           Some result_seed
         | KdNil -> None
       in
       BatOption.map snd (search_near_point_impl tree 0)
