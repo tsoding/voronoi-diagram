@@ -26,3 +26,21 @@ let generate_random_point {position; size}: point =
   let (x, y) = position in
   let (w, h) = size in
   (x + Random.int w, y + Random.int h)
+
+let split_rect_vert (x, y: point) {position; size}: rect * rect =
+  let rx, ry = position in
+  let w, h = size in
+  let lw = abs (rx - x) in
+  ({ position = (rx, ry);
+     size = (lw, h) },
+   { position = (x, ry);
+     size = (w - lw, h) })
+
+let split_rect_hor (x, y: point) {position; size}: rect * rect =
+  let rx, ry = position in
+  let w, h = size in
+  let lh = abs (ry - y) in
+  ({ position = (rx, ry);
+     size = (w, lh) },
+   { position = (rx, y);
+     size = (w, h - lh) })

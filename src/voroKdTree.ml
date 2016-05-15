@@ -31,29 +31,11 @@ module Make(Elt: ElementType): Kd =
 
     let k = 2
 
-    let split_rect_vert (x, y: point) {position; size}: rect * rect =
-      let rx, ry = position in
-      let w, h = size in
-      let lw = abs (rx - x) in
-      ({ position = (rx, ry);
-         size = (lw, h) },
-       { position = (x, ry);
-         size = (w - lw, h) })
-
-    let split_rect_hor (x, y: point) {position; size}: rect * rect =
-      let rx, ry = position in
-      let w, h = size in
-      let lh = abs (ry - y) in
-      ({ position = (rx, ry);
-         size = (w, lh) },
-       { position = (rx, y);
-         size = (w, h - lh) })
-
     let accessors : ('a * 'a -> 'a) array = [|fst; snd|]
     let hyperpivot : (point -> point -> point) array =
       [| (fun (sx, sy) (px, py) -> px, sy);
          (fun (sx, sy) (px, py) -> sx, py) |]
-    let splitters : (point -> rect -> rect * rect ) array = [|split_rect_vert; split_rect_hor|]
+    let splitters : (point -> rect -> rect * rect ) array = [|VoroGeo.split_rect_vert; VoroGeo.split_rect_hor|]
 
     let compare_with (f: 'a -> 'b) (a: 'a) (b: 'a): int =
       compare (f a) (f b)
