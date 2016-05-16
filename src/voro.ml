@@ -2,18 +2,17 @@ open Graphics
 open Future
 open VoroGeo
 open VoroSeeds
+open Set
 
 module Element2D =
   struct
-    type elt = int * int
-    type dem = int
+    type elt = seed
     let k = 2
-    let axis_get (elt: elt) (idx: int): dem =
+    let axis_get (idx: int) (point, _: elt): int =
       match idx with
-      | 0 -> fst elt
-      | 1 -> snd elt
+      | 0 -> fst point
+      | 1 -> snd point
       | _ -> failwith "Khooy"
-    let compare = Pervasives.compare
   end
 
 module Voro2dTree = VoroKdTree.Make(Element2D)
@@ -33,7 +32,7 @@ let seeds: seed list =
                    size = (window_width, window_height) }
                  amount_of_point
 
-let seedsTree: Voro2dTree.kdtree =
+let seedsTree: seed Voro2dTree.kdtree =
   Voro2dTree.build seeds
 
 let draw_chunk (x0, y0: int * int)

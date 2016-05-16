@@ -6,28 +6,28 @@ open BatPervasives
 module type ElementType =
   sig
     type elt
-    type dem
     val k: int
-    val axis_get: elt -> int -> dem
-    val compare: dem -> dem -> int
+    val axis_get: int -> elt -> int
   end
 
 module type Kd =
   sig
-    type kdtree
-    val build : seed list -> kdtree
-    val search_near_point : point -> kdtree -> color option
-    val print_tree : kdtree -> unit
-    val draw_tree : kdtree -> unit
+    type 'a kdtree
+    type elt
+    val build : elt list -> elt kdtree
+    val search_near_point : point -> seed kdtree -> color option
+    val print_tree : seed kdtree -> unit
+    val draw_tree : seed kdtree -> unit
   end
 
-module Make(Elt: ElementType): Kd =
+module Make(Elt: ElementType) =
   struct
-    type kdnode =
-      | KdNode of seed * kdnode * kdnode
+    type 'a kdnode =
+      | KdNode of 'a * 'a kdnode * 'a kdnode
       | KdNil
 
-    type kdtree = kdnode
+    type 'a kdtree = 'a kdnode
+    type elt = Elt.elt
 
     let k = 2
 
@@ -40,35 +40,35 @@ module Make(Elt: ElementType): Kd =
     let compare_with (f: 'a -> 'b) (a: 'a) (b: 'a): int =
       compare (f a) (f b)
 
-    let build (seeds: seed list): kdtree =
-      let rec build_impl (seeds: seed list) (seeds_length: int) (depth: int): kdnode =
+    let build (elts: elt list): elt kdtree =
+      let rec build_impl (elts: elt list) (elts_length: int) (depth: int): elt kdnode =
         let rest xs =
           match xs with
           | [] -> []
           | _ -> List.tl xs
         in
-        match seeds with
-        | [seed] -> KdNode (seed, KdNil, KdNil)
+        match elts with
+        | [elt] -> KdNode (elt, KdNil, KdNil)
         | [] -> KdNil
         | _ ->
            let axis = depth mod k in
-           let sorted_seeds = List.sort (compare_with (accessors.(axis) % fst)) seeds in
-           let seeds_half_length = seeds_length / 2 in
-           let left_seeds = BatList.take seeds_half_length sorted_seeds in
-           let median_seed = sorted_seeds
-                             |> BatList.drop seeds_half_length
+           let sorted_elts = List.sort (compare_with (Elt.axis_get axis)) elts in
+           let elts_half_length = elts_length / 2 in
+           let left_elts = BatList.take elts_half_length sorted_elts in
+           let median_elt = sorted_elts
+                             |> BatList.drop elts_half_length
                              |> List.hd in
-           let right_seeds = sorted_seeds
-                             |> BatList.drop seeds_half_length
+           let right_elts = sorted_elts
+                             |> BatList.drop elts_half_length
                              |> rest in
-           KdNode (median_seed,
-                   build_impl left_seeds seeds_half_length (depth + 1),
-                   build_impl right_seeds (seeds_half_length - 1) (depth + 1))
+           KdNode (median_elt,
+                   build_impl left_elts elts_half_length (depth + 1),
+                   build_impl right_elts (elts_half_length - 1) (depth + 1))
       in
-      build_impl seeds (List.length seeds) 0
+      build_impl elts (List.length elts) 0
 
-    let print_tree (tree: kdtree): unit =
-      let rec print_tree_impl (node: kdnode) (depth: int): unit =
+    let print_tree (tree: seed kdtree): unit =
+      let rec print_tree_impl (node: seed kdnode) (depth: int): unit =
         match node with
         | KdNode (((x, y), _), left, right) ->
            print_string @@ String.make depth ' ';
@@ -80,10 +80,10 @@ module Make(Elt: ElementType): Kd =
       print_tree_impl tree 0
 
 
-    let draw_tree (tree: kdtree): unit =
+    let draw_tree (tree: seed kdtree): unit =
       let width = size_x () in
       let height = size_y () in
-      let rec draw_tree_impl (node: kdnode) {position; size} (depth: int): unit =
+      let rec draw_tree_impl (node: seed kdnode) {position; size} (depth: int): unit =
         let rx, ry = position in
         let w, h = size in
         match node with
@@ -110,8 +110,8 @@ module Make(Elt: ElementType): Kd =
       then seed1
       else seed2
 
-    let search_near_point (search_point: point) (tree: kdtree): color option =
-      let rec search_near_point_impl (node: kdnode) (depth: int): seed option =
+    let search_near_point (search_point: point) (tree: seed kdtree): color option =
+      let rec search_near_point_impl (node: seed kdnode) (depth: int): seed option =
         match node with
         | KdNode ((pivot_point, pivot_color) as pivot_seed, left, right) ->
            let axis = depth mod k in
