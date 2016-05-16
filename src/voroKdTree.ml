@@ -12,21 +12,21 @@ module type ElementType =
 
 module type Kd =
   sig
-    type kdtree
+    type 'a kdtree
     type elt
-    val build : seed list -> kdtree
-    val search_near_point : point -> kdtree -> color option
-    val print_tree : kdtree -> unit
-    val draw_tree : kdtree -> unit
+    val build : seed list -> seed kdtree
+    val search_near_point : point -> seed kdtree -> color option
+    val print_tree : seed kdtree -> unit
+    val draw_tree : seed kdtree -> unit
   end
 
 module Make(Elt: ElementType): Kd =
   struct
-    type kdnode =
-      | KdNode of seed * kdnode * kdnode
+    type 'a kdnode =
+      | KdNode of 'a * 'a kdnode * 'a kdnode
       | KdNil
 
-    type kdtree = kdnode
+    type 'a kdtree = 'a kdnode
     type elt = Elt.elt
 
     let k = 2
@@ -40,8 +40,8 @@ module Make(Elt: ElementType): Kd =
     let compare_with (f: 'a -> 'b) (a: 'a) (b: 'a): int =
       compare (f a) (f b)
 
-    let build (seeds: seed list): kdtree =
-      let rec build_impl (seeds: seed list) (seeds_length: int) (depth: int): kdnode =
+    let build (seeds: seed list): seed kdtree =
+      let rec build_impl (seeds: seed list) (seeds_length: int) (depth: int): seed kdnode =
         let rest xs =
           match xs with
           | [] -> []
@@ -67,8 +67,8 @@ module Make(Elt: ElementType): Kd =
       in
       build_impl seeds (List.length seeds) 0
 
-    let print_tree (tree: kdtree): unit =
-      let rec print_tree_impl (node: kdnode) (depth: int): unit =
+    let print_tree (tree: seed kdtree): unit =
+      let rec print_tree_impl (node: seed kdnode) (depth: int): unit =
         match node with
         | KdNode (((x, y), _), left, right) ->
            print_string @@ String.make depth ' ';
@@ -80,10 +80,10 @@ module Make(Elt: ElementType): Kd =
       print_tree_impl tree 0
 
 
-    let draw_tree (tree: kdtree): unit =
+    let draw_tree (tree: seed kdtree): unit =
       let width = size_x () in
       let height = size_y () in
-      let rec draw_tree_impl (node: kdnode) {position; size} (depth: int): unit =
+      let rec draw_tree_impl (node: seed kdnode) {position; size} (depth: int): unit =
         let rx, ry = position in
         let w, h = size in
         match node with
@@ -110,8 +110,8 @@ module Make(Elt: ElementType): Kd =
       then seed1
       else seed2
 
-    let search_near_point (search_point: point) (tree: kdtree): color option =
-      let rec search_near_point_impl (node: kdnode) (depth: int): seed option =
+    let search_near_point (search_point: point) (tree: seed kdtree): color option =
+      let rec search_near_point_impl (node: seed kdnode) (depth: int): seed option =
         match node with
         | KdNode ((pivot_point, pivot_color) as pivot_seed, left, right) ->
            let axis = depth mod k in
