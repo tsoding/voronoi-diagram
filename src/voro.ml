@@ -13,6 +13,12 @@ module Element2D =
       | 0 -> fst point
       | 1 -> snd point
       | _ -> failwith "Khooy"
+    let as_string ((x, y), _: elt): string =
+      String.concat "" ["(";
+                        string_of_int x;
+                        ", ";
+                        string_of_int y;
+                        ")"]
   end
 
 module Voro2dTree = VoroKdTree.Make(Element2D)
