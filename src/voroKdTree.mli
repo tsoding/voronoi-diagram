@@ -12,6 +12,7 @@ module type ElementType =
 module type Kd =
   sig
     type kdtree
+    type elt
     val build : seed list -> kdtree
     val search_near_point : point -> kdtree -> color option
     val print_tree : kdtree -> unit

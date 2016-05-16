@@ -13,6 +13,7 @@ module type ElementType =
 module type Kd =
   sig
     type kdtree
+    type elt
     val build : seed list -> kdtree
     val search_near_point : point -> kdtree -> color option
     val print_tree : kdtree -> unit
@@ -26,6 +27,7 @@ module Make(Elt: ElementType): Kd =
       | KdNil
 
     type kdtree = kdnode
+    type elt = Elt.elt
 
     let k = 2
 
