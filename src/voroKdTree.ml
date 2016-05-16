@@ -9,6 +9,7 @@ module type ElementType =
     val k: int
     val axis_get: int -> elt -> int
     val as_string: elt -> string
+    val draw: rect -> unit
   end
 
 module type Kd =
