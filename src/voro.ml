@@ -2,15 +2,16 @@ open Graphics
 open Future
 open VoroGeo
 open VoroSeeds
+open Set
 
 module Element2D =
   struct
-    type elt = int * int
+    type elt = seed
     let k = 2
-    let axis_get (idx: int) (elt: elt): int =
+    let axis_get (idx: int) (point, _: elt): int =
       match idx with
-      | 0 -> fst elt
-      | 1 -> snd elt
+      | 0 -> fst point
+      | 1 -> snd point
       | _ -> failwith "Khooy"
   end
 

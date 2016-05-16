@@ -14,13 +14,13 @@ module type Kd =
   sig
     type 'a kdtree
     type elt
-    val build : seed list -> seed kdtree
+    val build : elt list -> elt kdtree
     val search_near_point : point -> seed kdtree -> color option
     val print_tree : seed kdtree -> unit
     val draw_tree : seed kdtree -> unit
   end
 
-module Make(Elt: ElementType): Kd =
+module Make(Elt: ElementType) =
   struct
     type 'a kdnode =
       | KdNode of 'a * 'a kdnode * 'a kdnode
@@ -40,32 +40,32 @@ module Make(Elt: ElementType): Kd =
     let compare_with (f: 'a -> 'b) (a: 'a) (b: 'a): int =
       compare (f a) (f b)
 
-    let build (seeds: seed list): seed kdtree =
-      let rec build_impl (seeds: seed list) (seeds_length: int) (depth: int): seed kdnode =
+    let build (elts: elt list): elt kdtree =
+      let rec build_impl (elts: elt list) (elts_length: int) (depth: int): elt kdnode =
         let rest xs =
           match xs with
           | [] -> []
           | _ -> List.tl xs
         in
-        match seeds with
-        | [seed] -> KdNode (seed, KdNil, KdNil)
+        match elts with
+        | [elt] -> KdNode (elt, KdNil, KdNil)
         | [] -> KdNil
         | _ ->
            let axis = depth mod k in
-           let sorted_seeds = List.sort (compare_with (accessors.(axis) % fst)) seeds in
-           let seeds_half_length = seeds_length / 2 in
-           let left_seeds = BatList.take seeds_half_length sorted_seeds in
-           let median_seed = sorted_seeds
-                             |> BatList.drop seeds_half_length
+           let sorted_elts = List.sort (compare_with (Elt.axis_get axis)) elts in
+           let elts_half_length = elts_length / 2 in
+           let left_elts = BatList.take elts_half_length sorted_elts in
+           let median_elt = sorted_elts
+                             |> BatList.drop elts_half_length
                              |> List.hd in
-           let right_seeds = sorted_seeds
-                             |> BatList.drop seeds_half_length
+           let right_elts = sorted_elts
+                             |> BatList.drop elts_half_length
                              |> rest in
-           KdNode (median_seed,
-                   build_impl left_seeds seeds_half_length (depth + 1),
-                   build_impl right_seeds (seeds_half_length - 1) (depth + 1))
+           KdNode (median_elt,
+                   build_impl left_elts elts_half_length (depth + 1),
+                   build_impl right_elts (elts_half_length - 1) (depth + 1))
       in
-      build_impl seeds (List.length seeds) 0
+      build_impl elts (List.length elts) 0
 
     let print_tree (tree: seed kdtree): unit =
       let rec print_tree_impl (node: seed kdnode) (depth: int): unit =
