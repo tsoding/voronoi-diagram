@@ -8,6 +8,7 @@ module type ElementType =
     type elt
     val k: int
     val axis_get: int -> elt -> int
+    val as_string: elt -> string
   end
 
 module type Kd =
@@ -16,7 +17,7 @@ module type Kd =
     type elt
     val build : elt list -> elt kdtree
     val search_near_point : point -> seed kdtree -> color option
-    val print_tree : seed kdtree -> unit
+    val print_tree : elt kdtree -> unit
     val draw_tree : seed kdtree -> unit
   end
 
@@ -67,12 +68,12 @@ module Make(Elt: ElementType) =
       in
       build_impl elts (List.length elts) 0
 
-    let print_tree (tree: seed kdtree): unit =
-      let rec print_tree_impl (node: seed kdnode) (depth: int): unit =
+    let print_tree (tree: elt kdtree): unit =
+      let rec print_tree_impl (node: elt kdnode) (depth: int): unit =
         match node with
-        | KdNode (((x, y), _), left, right) ->
+        | KdNode (elt, left, right) ->
            print_string @@ String.make depth ' ';
-           Printf.printf "(%d, %d)\n" x y;
+           print_endline @@ Elt.as_string elt;
            print_tree_impl left (depth + 1);
            print_tree_impl right (depth + 1)
         | KdNil -> ()
