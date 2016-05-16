@@ -6,14 +6,12 @@ open VoroSeeds
 module Element2D =
   struct
     type elt = int * int
-    type dem = int
     let k = 2
-    let axis_get (elt: elt) (idx: int): dem =
+    let axis_get (elt: elt) (idx: int): int =
       match idx with
       | 0 -> fst elt
       | 1 -> snd elt
       | _ -> failwith "Khooy"
-    let compare = Pervasives.compare
   end
 
 module Voro2dTree = VoroKdTree.Make(Element2D)

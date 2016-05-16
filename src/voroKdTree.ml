@@ -6,10 +6,8 @@ open BatPervasives
 module type ElementType =
   sig
     type elt
-    type dem
     val k: int
-    val axis_get: elt -> int -> dem
-    val compare: dem -> dem -> int
+    val axis_get: elt -> int -> int
   end
 
 module type Kd =
