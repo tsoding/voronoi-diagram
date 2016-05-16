@@ -7,7 +7,7 @@ module Element2D =
   struct
     type elt = int * int
     let k = 2
-    let axis_get (elt: elt) (idx: int): int =
+    let axis_get (idx: int) (elt: elt): int =
       match idx with
       | 0 -> fst elt
       | 1 -> snd elt

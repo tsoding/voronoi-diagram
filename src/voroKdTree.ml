@@ -7,7 +7,7 @@ module type ElementType =
   sig
     type elt
     val k: int
-    val axis_get: elt -> int -> int
+    val axis_get: int -> elt -> int
   end
 
 module type Kd =
