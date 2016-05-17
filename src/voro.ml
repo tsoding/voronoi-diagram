@@ -8,25 +8,17 @@ module Element2D =
   struct
     type elt = seed
     let k = 2
-
     let axis_get (idx: int) (point, _: elt): int =
       match idx with
       | 0 -> fst point
       | 1 -> snd point
       | _ -> failwith "Khooy"
-
     let as_string ((x, y), _: elt): string =
       String.concat "" ["(";
                         string_of_int x;
                         ", ";
                         string_of_int y;
                         ")"]
-
-    let draw {position; size}: unit =
-      let x, y = position in
-      let w, h = size in
-      Graphics.set_color Graphics.black;
-      Graphics.draw_rect x y w h
   end
 
 module Voro2dTree = VoroKdTree.Make(Element2D)
