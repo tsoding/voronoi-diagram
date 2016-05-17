@@ -1,5 +1,6 @@
 open OUnit2
 open VoroGeo
+open VoroList
 
 module Foo =
   struct
@@ -33,6 +34,14 @@ let test_split_rect_hor test_ctxt =
   assert_rects_equal actual_rect1 expected_rect1;
   assert_rects_equal actual_rect2 expected_rect2
 
+let test_group test_ctxt =
+  let input1 = [3; 4; 5; 6; 2; 3] in
+  let expected1 = [[3; 4]; [5; 6]; [2; 3]] in
+  let input2 = [3; 4; 5; 6; 2] in
+  let expected2 = [[3; 4]; [5; 6]; [2]] in
+  assert_equal expected1 @@ group 2 input1;
+  assert_equal expected2 @@ group 2 input2
+
 (* Name the test cases and group them together *)
 
 let suite =
@@ -40,6 +49,7 @@ let suite =
  ["test1">:: test1;
   "test2">:: test2;
   "test_split_rect_vert" >:: test_split_rect_vert;
-  "test_split_rect_hor" >:: test_split_rect_hor]
+  "test_split_rect_hor" >:: test_split_rect_hor;
+  "test_group" >:: test_group]
 
 let () = run_test_tt_main suite
