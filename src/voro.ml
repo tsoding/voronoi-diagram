@@ -3,6 +3,7 @@ open Future
 open VoroGeo
 open VoroSeeds
 open Set
+open BatOption
 
 module Element2D =
   struct
@@ -38,11 +39,18 @@ let amount_of_point = 100
 type voro_config = { p: int;
                      width: int;
                      height: int;
-                     amount_of_point: int }
+                     amount_of_points: int }
+
+let print_config (config: voro_config): unit =
+  Printf.printf "p: %d\n" config.p;
+  Printf.printf "width: %d\n" config.width;
+  Printf.printf "height: %d\n" config.height;
+  Printf.printf "n: %d\n" config.amount_of_points;
+  Printf.printf "%!"
+
 
 let seeds: seed list =
-  generate_seeds { position = (0, 0);
-                   size = (window_width, window_height) }
+  generate_seeds (VoroGeo.make_rect 0 0 window_width window_height)
                  amount_of_point
 
 let seedsTree: seed Voro2dTree.kdnode =
@@ -130,18 +138,28 @@ let update_config (config: voro_config)
   | "-p" -> { config with p = int_of_string value }
   | "-w" -> { config with width = int_of_string value }
   | "-h" -> { config with height = int_of_string value }
-  | "-n" -> { config with amount_of_point = int_of_string value }
-  | _ -> config
+  | "-n" -> { config with amount_of_points = int_of_string value }
+  | _ -> invalid_arg @@ String.concat "" ["Unknown flag: "; flag]
+
+let update_config_with_pair (config: voro_config)
+                            (pair: string list): voro_config =
+  match pair with
+  | [flag; value] -> update_config config flag value
+  | [flag] -> update_config config flag ""
+  | _ -> failwith "This should not happen"
 
 let parse_args (args: string list): voro_config =
   let default_config = { width = 800;
                          height = 600;
-                         amount_of_point = 100;
+                         amount_of_points = 100;
                          p = 2 } in
-  default_config
+  args
+  |> VoroList.group 2
+  |> List.fold_left update_config_with_pair default_config
 
 let _ =
-  let config = Array.to_list Sys.argv |> parse_args in
+  let config = Array.to_list Sys.argv |> List.tl |> parse_args in
+  print_config config;
   open_graph "";
   auto_synchronize false;
   resize_window window_width window_height;
