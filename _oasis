@@ -22,7 +22,8 @@ Executable voro_test_runner
   CompiledObject: best
   BuildDepends:
     oUnit,
-    batteries
+    batteries,
+    graphics
 
 Test voro_test
   Command: $voro_test_runner

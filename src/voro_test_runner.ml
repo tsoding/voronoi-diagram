@@ -1,6 +1,7 @@
 open OUnit2
 open VoroGeo
 open VoroList
+open VoroGraphics
 
 module Foo =
   struct
@@ -42,6 +43,12 @@ let test_group test_ctxt =
   assert_equal expected1 @@ group 2 input1;
   assert_equal expected2 @@ group 2 input2
 
+let test_unrgb test_ctxt =
+  assert_equal (255, 0, 0) @@ unrgb Graphics.red;
+  assert_equal (0, 255, 0) @@ unrgb Graphics.green;
+  assert_equal (0, 0, 255) @@ unrgb Graphics.blue;
+  assert_equal (34, 100, 240) @@ unrgb @@ Graphics.rgb 34 100 240
+
 (* Name the test cases and group them together *)
 
 let suite =
@@ -50,6 +57,7 @@ let suite =
   "test2">:: test2;
   "test_split_rect_vert" >:: test_split_rect_vert;
   "test_split_rect_hor" >:: test_split_rect_hor;
-  "test_group" >:: test_group]
+  "test_group" >:: test_group;
+  "test_unrgb" >:: test_unrgb]
 
 let () = run_test_tt_main suite

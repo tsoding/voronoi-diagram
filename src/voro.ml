@@ -58,6 +58,20 @@ let draw_chunk (x0, y0: int * int)
     done
   done
 
+let print_im_chunk (x0, y0: point)
+                   (chunk: chunk): unit =
+  let h = Array.length chunk in
+  let w = Array.length chunk.(0) in
+  for y = 0 to h - 1 do
+    let row = Array.get chunk y in
+    for x = 0 to w - 1 do
+      let color = Array.get row x in
+      let (r, g, b) = VoroGraphics.unrgb color in
+      Printf.printf "%d,%d: (%d,%d,%d)\n" (x + x0) (y + y0) r g b;
+      Printf.printf "%!"
+    done
+  done
+
 let calc_chunk (distance: distance_function)
                (seedsTree: seed Voro2dTree.kdnode)
                (x0, y0, x1, y1: int * int * int * int): chunk =
