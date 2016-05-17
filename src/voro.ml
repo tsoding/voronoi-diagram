@@ -3,6 +3,7 @@ open Future
 open VoroGeo
 open VoroSeeds
 open Set
+open BatOption
 
 module Element2D =
   struct
@@ -31,17 +32,18 @@ open Future4
 
 type chunk = color array array
 
-let window_width = 800
-let window_height = 600
-let amount_of_point = 100
+type voro_config = { p: int;
+                     width: int;
+                     height: int;
+                     amount_of_points: int }
 
-let seeds: seed list =
-  generate_seeds { position = (0, 0);
-                   size = (window_width, window_height) }
-                 amount_of_point
+let print_config (config: voro_config): unit =
+  Printf.printf "p: %d\n" config.p;
+  Printf.printf "width: %d\n" config.width;
+  Printf.printf "height: %d\n" config.height;
+  Printf.printf "n: %d\n" config.amount_of_points;
+  Printf.printf "%!"
 
-let seedsTree: seed Voro2dTree.kdnode =
-  Voro2dTree.build seeds
 
 let draw_chunk (x0, y0: int * int)
                (chunk: chunk): unit =
@@ -57,6 +59,7 @@ let draw_chunk (x0, y0: int * int)
   done
 
 let calc_chunk (distance: distance_function)
+               (seedsTree: seed Voro2dTree.kdnode)
                (x0, y0, x1, y1: int * int * int * int): chunk =
   let w = x1 - x0 + 1 in
   let h = y1 - y0 + 1 in
@@ -73,25 +76,29 @@ let calc_chunk (distance: distance_function)
   done;
   chunk
 
-let draw_voronoi (distance: distance_function): unit =
+let draw_voronoi (config: voro_config)
+                 (seedsTree: seed Voro2dTree.kdnode): unit =
+  let distance = VoroGeo.pnorm_distance config.p in
+  let window_width = config.width in
+  let window_height = config.height in
   let half_width = window_width / 2 in
   let half_height = window_height / 2 in
   let rects = [0, 0, half_width, half_height;
                half_width + 1, 0, window_width - 1, half_height;
                0, half_height + 1, half_width + 1, window_height - 1;
                half_width + 1, half_height + 1, window_width - 1, window_height - 1] in
-  let chunks = rects |> List.map (fun rect -> future (calc_chunk distance) rect) in
+  let chunks = rects |> List.map (fun rect -> future (calc_chunk distance seedsTree) rect) in
   chunks
   |> List.map force
   |> List.combine rects
   |> List.iter (fun ((x, y, _, _), chunk) -> draw_chunk (x, y) chunk)
 
-let draw_point ((x, y), _ : point * color): unit =
+let draw_seed ((x, y), _ : point * color): unit =
   set_color black;
   fill_circle x y 2
 
-let draw_points (): unit =
-  List.iter draw_point seeds
+let draw_seeds (seeds: seed list): unit =
+  List.iter draw_seed seeds
 
 let splitters : (point -> rect -> rect * rect ) array =
   [|VoroGeo.split_rect_vert;
@@ -118,15 +125,51 @@ let draw_tree (tree: seed kdnode): unit =
   in
   draw_tree_impl tree (make_rect 0 0 width height) 0
 
+let update_config (config: voro_config)
+                  (flag: string)
+                  (value: string): voro_config =
+  match flag with
+  | "-p" -> { config with p = int_of_string value }
+  | "-w" -> { config with width = int_of_string value }
+  | "-h" -> { config with height = int_of_string value }
+  | "-n" -> { config with amount_of_points = int_of_string value }
+  | _ -> invalid_arg @@ String.concat "" ["Unknown flag: "; flag]
+
+let update_config_with_pair (config: voro_config)
+                            (pair: string list): voro_config =
+  match pair with
+  | [flag; value] -> update_config config flag value
+  | [flag] -> update_config config flag ""
+  | _ -> failwith "This should not happen"
+
+let parse_args (args: string list): voro_config =
+  let default_config = { width = 800;
+                         height = 600;
+                         amount_of_points = 100;
+                         p = 2 } in
+  args
+  |> VoroList.group 2
+  |> List.fold_left update_config_with_pair default_config
+
 let _ =
-  let p = (match Array.to_list Sys.argv with
-           | _ :: valueOfP :: _ -> int_of_string valueOfP
-           | _ -> 2) in
+
+  let config = Array.to_list Sys.argv |> List.tl |> parse_args in
+  print_config config;
+
+  let seeds: seed list =
+    generate_seeds (VoroGeo.make_rect 0 0 config.width config.height)
+                   config.amount_of_points
+  in
+
+  let seedsTree: seed Voro2dTree.kdnode =
+    Voro2dTree.build seeds
+  in
+
   open_graph "";
   auto_synchronize false;
-  resize_window window_width window_height;
-  draw_voronoi @@ pnorm_distance p;
+  resize_window config.width config.height;
+  draw_voronoi config seedsTree;
   draw_tree seedsTree;
-  draw_points ();
+  draw_seeds seeds;
   synchronize ();
   read_key ()
