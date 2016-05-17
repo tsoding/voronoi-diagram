@@ -19,7 +19,6 @@ module type Kd =
     val build : elt list -> elt kdnode
     val search_near_point : point -> seed kdnode -> color option
     val print_tree : elt kdnode -> unit
-    val draw_tree : seed kdnode -> unit
   end
 
 module Make(Elt: ElementType): Kd with type elt = Elt.elt

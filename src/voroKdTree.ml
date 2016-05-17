@@ -20,7 +20,6 @@ module type Kd =
     val build : elt list -> elt kdnode
     val search_near_point : point -> seed kdnode -> color option
     val print_tree : elt kdnode -> unit
-    val draw_tree : seed kdnode -> unit
   end
 
 module Make(Elt: ElementType) =
@@ -37,7 +36,7 @@ module Make(Elt: ElementType) =
     let hyperpivot : (point -> point -> point) array =
       [| (fun (sx, sy) (px, py) -> px, sy);
          (fun (sx, sy) (px, py) -> sx, py) |]
-    let splitters : (point -> rect -> rect * rect ) array = [|VoroGeo.split_rect_vert; VoroGeo.split_rect_hor|]
+
 
     let compare_with (f: 'a -> 'b) (a: 'a) (b: 'a): int =
       compare (f a) (f b)
@@ -81,27 +80,6 @@ module Make(Elt: ElementType) =
       in
       print_tree_impl tree 0
 
-
-    let draw_tree (tree: seed kdnode): unit =
-      let width = size_x () in
-      let height = size_y () in
-      let rec draw_tree_impl (node: seed kdnode) {position; size} (depth: int): unit =
-        let rx, ry = position in
-        let w, h = size in
-        match node with
-        | KdNode ((pivot, _), left, right) ->
-           Graphics.set_color Graphics.black;
-           Graphics.draw_rect rx ry w h;
-           let axis = depth mod k in
-           let splitter = splitters.(axis) in
-           let (left_rect, right_rect) = splitter pivot @@ make_rect rx ry w h in
-           draw_tree_impl left left_rect (depth + 1);
-           draw_tree_impl right right_rect (depth + 1)
-        | KdNil ->
-           Graphics.set_color Graphics.black;
-           Graphics.draw_rect rx ry w h
-      in
-      draw_tree_impl tree (make_rect 0 0 width height) 0
 
     let closer_seed (search_point: point)
                     (seed1_point, _ as seed1: seed)
