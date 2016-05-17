@@ -22,6 +22,8 @@ module Element2D =
   end
 
 module Voro2dTree = VoroKdTree.Make(Element2D)
+open Voro2dTree
+
 module Future4 = Future.Make(struct
                               let process_limit = 4
                             end)
@@ -38,7 +40,7 @@ let seeds: seed list =
                    size = (window_width, window_height) }
                  amount_of_point
 
-let seedsTree: seed Voro2dTree.kdtree =
+let seedsTree: seed Voro2dTree.kdnode =
   Voro2dTree.build seeds
 
 let draw_chunk (x0, y0: int * int)
@@ -92,6 +94,31 @@ let draw_point ((x, y), _ : point * color): unit =
 let draw_points (): unit =
   List.iter draw_point seeds
 
+let splitters : (point -> rect -> rect * rect ) array =
+  [|VoroGeo.split_rect_vert;
+    VoroGeo.split_rect_hor|]
+
+let draw_tree (tree: seed kdnode): unit =
+  let width = size_x () in
+  let height = size_y () in
+  let rec draw_tree_impl (node: seed kdnode) {position; size} (depth: int): unit =
+    let rx, ry = position in
+    let w, h = size in
+    match node with
+    | KdNode ((pivot, _), left, right) ->
+       Graphics.set_color Graphics.black;
+       Graphics.draw_rect rx ry w h;
+       let axis = depth mod 2 in
+       let splitter = splitters.(axis) in
+       let (left_rect, right_rect) = splitter pivot @@ make_rect rx ry w h in
+       draw_tree_impl left left_rect (depth + 1);
+       draw_tree_impl right right_rect (depth + 1)
+    | KdNil ->
+       Graphics.set_color Graphics.black;
+       Graphics.draw_rect rx ry w h
+  in
+  draw_tree_impl tree (make_rect 0 0 width height) 0
+
 let _ =
   let p = (match Array.to_list Sys.argv with
            | _ :: valueOfP :: _ -> int_of_string valueOfP
@@ -100,7 +127,7 @@ let _ =
   auto_synchronize false;
   resize_window window_width window_height;
   draw_voronoi @@ pnorm_distance p;
-  Voro2dTree.draw_tree seedsTree;
+  draw_tree seedsTree;
   draw_points ();
   synchronize ();
   read_key ()

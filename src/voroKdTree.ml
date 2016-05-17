@@ -13,12 +13,13 @@ module type ElementType =
 
 module type Kd =
   sig
-    type 'a kdtree
+    type 'a kdnode =
+      | KdNode of 'a * 'a kdnode * 'a kdnode
+      | KdNil
     type elt
-    val build : elt list -> elt kdtree
-    val search_near_point : point -> seed kdtree -> color option
-    val print_tree : elt kdtree -> unit
-    val draw_tree : seed kdtree -> unit
+    val build : elt list -> elt kdnode
+    val search_near_point : point -> seed kdnode -> color option
+    val print_tree : elt kdnode -> unit
   end
 
 module Make(Elt: ElementType) =
@@ -27,7 +28,6 @@ module Make(Elt: ElementType) =
       | KdNode of 'a * 'a kdnode * 'a kdnode
       | KdNil
 
-    type 'a kdtree = 'a kdnode
     type elt = Elt.elt
 
     let k = 2
@@ -36,12 +36,12 @@ module Make(Elt: ElementType) =
     let hyperpivot : (point -> point -> point) array =
       [| (fun (sx, sy) (px, py) -> px, sy);
          (fun (sx, sy) (px, py) -> sx, py) |]
-    let splitters : (point -> rect -> rect * rect ) array = [|VoroGeo.split_rect_vert; VoroGeo.split_rect_hor|]
+
 
     let compare_with (f: 'a -> 'b) (a: 'a) (b: 'a): int =
       compare (f a) (f b)
 
-    let build (elts: elt list): elt kdtree =
+    let build (elts: elt list): elt kdnode =
       let rec build_impl (elts: elt list) (elts_length: int) (depth: int): elt kdnode =
         let rest xs =
           match xs with
@@ -68,7 +68,7 @@ module Make(Elt: ElementType) =
       in
       build_impl elts (List.length elts) 0
 
-    let print_tree (tree: elt kdtree): unit =
+    let print_tree (tree: elt kdnode): unit =
       let rec print_tree_impl (node: elt kdnode) (depth: int): unit =
         match node with
         | KdNode (elt, left, right) ->
@@ -81,27 +81,6 @@ module Make(Elt: ElementType) =
       print_tree_impl tree 0
 
 
-    let draw_tree (tree: seed kdtree): unit =
-      let width = size_x () in
-      let height = size_y () in
-      let rec draw_tree_impl (node: seed kdnode) {position; size} (depth: int): unit =
-        let rx, ry = position in
-        let w, h = size in
-        match node with
-        | KdNode ((pivot, _), left, right) ->
-           Graphics.set_color Graphics.black;
-           Graphics.draw_rect rx ry w h;
-           let axis = depth mod k in
-           let splitter = splitters.(axis) in
-           let (left_rect, right_rect) = splitter pivot @@ make_rect rx ry w h in
-           draw_tree_impl left left_rect (depth + 1);
-           draw_tree_impl right right_rect (depth + 1)
-        | KdNil ->
-           Graphics.set_color Graphics.black;
-           Graphics.draw_rect rx ry w h
-      in
-      draw_tree_impl tree (make_rect 0 0 width height) 0
-
     let closer_seed (search_point: point)
                     (seed1_point, _ as seed1: seed)
                     (seed2_point, _ as seed2: seed): seed =
@@ -111,7 +90,7 @@ module Make(Elt: ElementType) =
       then seed1
       else seed2
 
-    let search_near_point (search_point: point) (tree: seed kdtree): color option =
+    let search_near_point (search_point: point) (tree: seed kdnode): color option =
       let rec search_near_point_impl (node: seed kdnode) (depth: int): seed option =
         match node with
         | KdNode ((pivot_point, pivot_color) as pivot_seed, left, right) ->
