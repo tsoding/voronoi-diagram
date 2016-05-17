@@ -13,12 +13,14 @@ module type ElementType =
 
 module type Kd =
   sig
-    type 'a kdtree
+    type 'a kdnode =
+      | KdNode of 'a * 'a kdnode * 'a kdnode
+      | KdNil
     type elt
-    val build : elt list -> elt kdtree
-    val search_near_point : point -> seed kdtree -> color option
-    val print_tree : elt kdtree -> unit
-    val draw_tree : seed kdtree -> unit
+    val build : elt list -> elt kdnode
+    val search_near_point : point -> seed kdnode -> color option
+    val print_tree : elt kdnode -> unit
+    val draw_tree : seed kdnode -> unit
   end
 
 module Make(Elt: ElementType): Kd with type elt = Elt.elt

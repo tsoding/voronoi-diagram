@@ -46,7 +46,7 @@ let seeds: seed list =
                    size = (window_width, window_height) }
                  amount_of_point
 
-let seedsTree: seed Voro2dTree.kdtree =
+let seedsTree: seed Voro2dTree.kdnode =
   Voro2dTree.build seeds
 
 let draw_chunk (x0, y0: int * int)
