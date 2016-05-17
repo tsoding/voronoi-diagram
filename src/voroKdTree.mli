@@ -17,7 +17,7 @@ module type Kd =
       | KdNil
     type elt
     val build : elt list -> elt kdnode
-    val search_near_point : point -> seed kdnode -> color option
+    val search_near_point : distance_function -> point -> seed kdnode -> color option
     val print_tree : elt kdnode -> unit
   end
 
