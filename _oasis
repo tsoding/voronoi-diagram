@@ -21,7 +21,8 @@ Executable voro_test_runner
   MainIs: voro_test_runner.ml
   CompiledObject: best
   BuildDepends:
-    oUnit
+    oUnit,
+    batteries
 
 Test voro_test
   Command: $voro_test_runner

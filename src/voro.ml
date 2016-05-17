@@ -35,6 +35,11 @@ let window_width = 800
 let window_height = 600
 let amount_of_point = 100
 
+type voro_config = { p: int;
+                     width: int;
+                     height: int;
+                     amount_of_point: int }
+
 let seeds: seed list =
   generate_seeds { position = (0, 0);
                    size = (window_width, window_height) }
@@ -118,14 +123,29 @@ let draw_tree (tree: seed kdnode): unit =
   in
   draw_tree_impl tree (make_rect 0 0 width height) 0
 
+let update_config (config: voro_config)
+                  (flag: string)
+                  (value: string): voro_config =
+  match flag with
+  | "-p" -> { config with p = int_of_string value }
+  | "-w" -> { config with width = int_of_string value }
+  | "-h" -> { config with height = int_of_string value }
+  | "-n" -> { config with amount_of_point = int_of_string value }
+  | _ -> config
+
+let parse_args (args: string list): voro_config =
+  let default_config = { width = 800;
+                         height = 600;
+                         amount_of_point = 100;
+                         p = 2 } in
+  default_config
+
 let _ =
-  let p = (match Array.to_list Sys.argv with
-           | _ :: valueOfP :: _ -> int_of_string valueOfP
-           | _ -> 2) in
+  let config = Array.to_list Sys.argv |> parse_args in
   open_graph "";
   auto_synchronize false;
   resize_window window_width window_height;
-  draw_voronoi @@ pnorm_distance p;
+  draw_voronoi @@ pnorm_distance config.p;
   draw_tree seedsTree;
   draw_points ();
   synchronize ();
