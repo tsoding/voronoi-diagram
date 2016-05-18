@@ -10,6 +10,11 @@ module Element2D =
     type elt = seed
     let k = 2
 
+    let make (xs: int list): elt =
+      match xs with
+      | [x; y] -> (x, y), Graphics.black
+      | _ -> failwith "Khooy"
+
     let axis_get (idx: int) (point, _: elt): int =
       match idx with
       | 0 -> fst point

@@ -7,6 +7,7 @@ module type ElementType =
   sig
     type elt
     val k: int
+    val make: int list -> elt
     val axis_get: int -> elt -> int
     val as_string: elt -> string
     val distance: elt -> elt -> int
