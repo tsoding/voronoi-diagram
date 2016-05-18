@@ -15,7 +15,7 @@ module type Kd =
     type elt
     type elt_distance_function = elt -> elt -> float
     val build : elt list -> elt kdnode
-    val search_near_point_general : elt_distance_function -> elt -> elt kdnode -> elt option
+    val search_near_point : elt_distance_function -> elt -> elt kdnode -> elt option
     val print_tree : elt kdnode -> unit
   end
 
@@ -89,10 +89,10 @@ module Make(Elt: ElementType) =
       then elt1
       else elt2
 
-    let search_near_point_general (distance: elt_distance_function)
+    let search_near_point (distance: elt_distance_function)
                                   (search_elt: elt)
                                   (tree: elt kdnode): elt option =
-      let rec search_near_point_general_impl (node: elt kdnode) (depth: int): elt option =
+      let rec search_near_point_impl (node: elt kdnode) (depth: int): elt option =
         match node with
         | KdNode (pivot_elt, left, right) ->
            let axis = depth mod Elt.k in
@@ -105,7 +105,7 @@ module Make(Elt: ElementType) =
            in
 
            let best_elt =
-             search_near_point_general_impl next_branch (depth + 1)
+             search_near_point_impl next_branch (depth + 1)
              |> BatOption.map @@ (closer_elt distance search_elt pivot_elt)
              |> BatOption.default pivot_elt
            in
@@ -114,7 +114,7 @@ module Make(Elt: ElementType) =
            let hyper_distance = distance search_elt hyper_elt in
            let best_distance = distance search_elt best_elt in
            let probably_better_elt = if hyper_distance < best_distance
-                                     then search_near_point_general_impl opposite_branch (depth + 1)
+                                     then search_near_point_impl opposite_branch (depth + 1)
                                      else None in
 
            let result_elt = probably_better_elt
@@ -125,5 +125,5 @@ module Make(Elt: ElementType) =
            Some result_elt
         | KdNil -> None
       in
-      search_near_point_general_impl tree 0
+      search_near_point_impl tree 0
   end

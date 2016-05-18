@@ -15,7 +15,7 @@ module type Kd =
     type elt
     type elt_distance_function = elt -> elt -> float
     val build : elt list -> elt kdnode
-    val search_near_point_general : elt_distance_function -> elt -> elt kdnode-> elt option
+    val search_near_point : elt_distance_function -> elt -> elt kdnode-> elt option
     val print_tree : elt kdnode -> unit
   end
 
