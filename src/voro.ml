@@ -9,17 +9,24 @@ module Element2D =
   struct
     type elt = seed
     let k = 2
+
     let axis_get (idx: int) (point, _: elt): int =
       match idx with
       | 0 -> fst point
       | 1 -> snd point
       | _ -> failwith "Khooy"
+
     let as_string ((x, y), _: elt): string =
       String.concat "" ["(";
                         string_of_int x;
                         ", ";
                         string_of_int y;
                         ")"]
+
+    let distance ((x1, y1), _: elt) ((x2, y2), _: elt): int =
+      let dx = x1 - x2 in
+      let dy = y1 - y2 in
+      dx * dx + dy * dy
   end
 
 module Voro2dTree = VoroKdTree.Make(Element2D)
