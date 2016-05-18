@@ -1,12 +1,8 @@
-open Graphics
-open VoroGeo
-open VoroSeeds
-open BatPervasives
-
 module type ElementType =
   sig
     type elt
     val k: int
+    val make: int list -> elt
     val axis_get: int -> elt -> int
     val as_string: elt -> string
   end
@@ -17,8 +13,9 @@ module type Kd =
       | KdNode of 'a * 'a kdnode * 'a kdnode
       | KdNil
     type elt
+    type elt_distance_function = elt -> elt -> float
     val build : elt list -> elt kdnode
-    val search_near_point : distance_function -> point -> seed kdnode -> color option
+    val search_near_point : elt_distance_function -> elt -> elt kdnode -> elt option
     val print_tree : elt kdnode -> unit
   end
 
@@ -29,14 +26,16 @@ module Make(Elt: ElementType) =
       | KdNil
 
     type elt = Elt.elt
+    type elt_distance_function = elt -> elt -> float
 
     let k = 2
 
     let accessors : ('a * 'a -> 'a) array = [|fst; snd|]
-    let hyperpivot : (point -> point -> point) array =
-      [| (fun (sx, sy) (px, py) -> px, sy);
-         (fun (sx, sy) (px, py) -> sx, py) |]
 
+    let hyper (axis: int) (search_elt: elt) (pivot_elt: elt): elt =
+      let search_point = Array.init Elt.k @@ (fun x -> Elt.axis_get x search_elt) in
+      Array.set search_point axis @@ Elt.axis_get axis pivot_elt;
+      Elt.make @@ Array.to_list search_point
 
     let compare_with (f: 'a -> 'b) (a: 'a) (b: 'a): int =
       compare (f a) (f b)
@@ -80,51 +79,51 @@ module Make(Elt: ElementType) =
       in
       print_tree_impl tree 0
 
+    let closer_elt (distance: elt_distance_function)
+                   (search_elt: elt)
+                   (elt1: elt)
+                   (elt2: elt): elt =
+      let elt1_distance = distance search_elt elt1 in
+      let elt2_distance = distance search_elt elt2 in
+      if elt1_distance < elt2_distance
+      then elt1
+      else elt2
 
-    let closer_seed (distance: distance_function)
-                    (search_point: point)
-                    (seed1_point, _ as seed1: seed)
-                    (seed2_point, _ as seed2: seed): seed =
-      let seed1_distance = distance search_point seed1_point in
-      let seed2_distance = distance search_point seed2_point in
-      if seed1_distance < seed2_distance
-      then seed1
-      else seed2
-
-    let search_near_point (distance: distance_function)
-                          (search_point: point)
-                          (tree: seed kdnode): color option =
-      let rec search_near_point_impl (node: seed kdnode) (depth: int): seed option =
+    let search_near_point (distance: elt_distance_function)
+                                  (search_elt: elt)
+                                  (tree: elt kdnode): elt option =
+      let rec search_near_point_impl (node: elt kdnode) (depth: int): elt option =
         match node with
-        | KdNode ((pivot_point, pivot_color) as pivot_seed, left, right) ->
-           let axis = depth mod k in
-           let search_axis = accessors.(axis) search_point in
-           let pivot_axis = accessors.(axis) pivot_point in
+        | KdNode (pivot_elt, left, right) ->
+           let axis = depth mod Elt.k in
+           let search_axis = Elt.axis_get axis search_elt in
+           let pivot_axis = Elt.axis_get axis pivot_elt in
            let (next_branch, opposite_branch) =
              if search_axis < pivot_axis
              then (left, right)
              else (right, left)
            in
-           let best_point, _ as best_seed =
+
+           let best_elt =
              search_near_point_impl next_branch (depth + 1)
-             |> BatOption.map @@ (closer_seed distance search_point pivot_seed)
-             |> BatOption.default pivot_seed
+             |> BatOption.map @@ (closer_elt distance search_elt pivot_elt)
+             |> BatOption.default pivot_elt
            in
 
-           let hyperpivot_point = hyperpivot.(axis) search_point pivot_point in
-           let hyperpivot_distance = distance search_point hyperpivot_point in
-           let best_distance = distance search_point best_point in
-           let probably_better_seed = if hyperpivot_distance < best_distance
-                                      then search_near_point_impl opposite_branch (depth + 1)
-                                      else None in
+           let hyper_elt = hyper axis search_elt pivot_elt in
+           let hyper_distance = distance search_elt hyper_elt in
+           let best_distance = distance search_elt best_elt in
+           let probably_better_elt = if hyper_distance < best_distance
+                                     then search_near_point_impl opposite_branch (depth + 1)
+                                     else None in
 
-           let result_seed = probably_better_seed
-                             |> BatOption.map (closer_seed distance search_point best_seed)
-                             |> BatOption.default best_seed
+           let result_elt = probably_better_elt
+                            |> BatOption.map (closer_elt distance search_elt best_elt)
+                            |> BatOption.default best_elt
            in
 
-           Some result_seed
+           Some result_elt
         | KdNil -> None
       in
-      BatOption.map snd (search_near_point_impl tree 0)
+      search_near_point_impl tree 0
   end

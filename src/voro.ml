@@ -9,11 +9,18 @@ module Element2D =
   struct
     type elt = seed
     let k = 2
+
+    let make (xs: int list): elt =
+      match xs with
+      | [x; y] -> (x, y), Graphics.black
+      | _ -> failwith "Khooy"
+
     let axis_get (idx: int) (point, _: elt): int =
       match idx with
       | 0 -> fst point
       | 1 -> snd point
       | _ -> failwith "Khooy"
+
     let as_string ((x, y), _: elt): string =
       String.concat "" ["(";
                         string_of_int x;
@@ -67,9 +74,10 @@ let calc_chunk (distance: distance_function)
   for y = y0 to y1 do
     let row = Array.get chunk (y - y0) in
     for x = x0 to x1 do
-      let color =
-        Voro2dTree.search_near_point distance (x, y) seedsTree
-        |> BatOption.default black
+      let _, color =
+        Voro2dTree.search_near_point (fun (p1, _) (p2, _) -> distance p1 p2)
+                                     ((x, y), black) seedsTree
+        |> BatOption.default ((0, 0), black)
       in
       Array.set row (x - x0) color
     done
