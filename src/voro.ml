@@ -79,9 +79,9 @@ let calc_chunk (distance: distance_function)
   for y = y0 to y1 do
     let row = Array.get chunk (y - y0) in
     for x = x0 to x1 do
-      let color =
-        Voro2dTree.search_near_point distance (x, y) seedsTree
-        |> BatOption.default black
+      let _, color =
+        Voro2dTree.search_near_point_general ((x, y), black) seedsTree
+        |> BatOption.default ((0, 0), black)
       in
       Array.set row (x - x0) color
     done

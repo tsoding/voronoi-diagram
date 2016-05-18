@@ -94,6 +94,13 @@ module Make(Elt: ElementType) =
       then seed1
       else seed2
 
+    let closer_elt (search_elt: elt) (elt1: elt) (elt2: elt): elt =
+      let elt1_distance = Elt.distance search_elt elt1 in
+      let elt2_distance = Elt.distance search_elt elt2 in
+      if elt1_distance < elt2_distance
+      then elt1
+      else elt2
+
     let search_near_point (distance: distance_function)
                           (search_point: point)
                           (tree: seed kdnode): color option =
@@ -133,7 +140,24 @@ module Make(Elt: ElementType) =
 
     let search_near_point_general (search_elt: elt)
                                   (tree: elt kdnode): elt option =
-      None
-
-
+      let rec search_near_point_general_impl (node: elt kdnode) (depth: int): elt option =
+        match node with
+        | KdNode (pivot_elt, left, right) ->
+           let axis = depth mod Elt.k in
+           let search_axis = Elt.axis_get axis search_elt in
+           let pivot_axis = Elt.axis_get axis pivot_elt in
+           let (next_branch, opposite_branch) =
+             if search_axis < pivot_axis
+             then (left, right)
+             else (right, left)
+           in
+           let best_elt =
+             search_near_point_general_impl next_branch (depth + 1)
+             |> BatOption.map @@ (closer_elt search_elt pivot_elt)
+             |> BatOption.default pivot_elt
+           in
+           Some best_elt
+        | KdNil -> None
+      in
+      search_near_point_general_impl tree 0
   end
