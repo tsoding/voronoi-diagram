@@ -40,6 +40,10 @@ module Make(Elt: ElementType) =
       [| (fun (sx, sy) (px, py) -> px, sy);
          (fun (sx, sy) (px, py) -> sx, py) |]
 
+    let hyper (axis: int) (search_elt: elt) (pivot_elt: elt): elt =
+      let search_point = Array.init Elt.k @@ (fun x -> Elt.axis_get x search_elt) in
+      Array.set search_point axis @@ Elt.axis_get axis pivot_elt;
+      Elt.make @@ Array.to_list search_point
 
     let compare_with (f: 'a -> 'b) (a: 'a) (b: 'a): int =
       compare (f a) (f b)
@@ -151,12 +155,26 @@ module Make(Elt: ElementType) =
              then (left, right)
              else (right, left)
            in
+
            let best_elt =
              search_near_point_general_impl next_branch (depth + 1)
              |> BatOption.map @@ (closer_elt search_elt pivot_elt)
              |> BatOption.default pivot_elt
            in
-           Some best_elt
+
+           let hyper_elt = hyper axis search_elt pivot_elt in
+           let hyper_distance = Elt.distance search_elt hyper_elt in
+           let best_distance = Elt.distance search_elt best_elt in
+           let probably_better_elt = if hyper_distance < best_distance
+                                     then search_near_point_general_impl opposite_branch (depth + 1)
+                                     else None in
+
+           let result_elt = probably_better_elt
+                            |> BatOption.map (closer_elt search_elt best_elt)
+                            |> BatOption.default best_elt
+           in
+
+           Some result_elt
         | KdNil -> None
       in
       search_near_point_general_impl tree 0
