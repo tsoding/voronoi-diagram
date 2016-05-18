@@ -23,7 +23,7 @@
 
     $ oasis setup -setup-update dynamic
     $ make
-    $ ./voro.native [pnorm]
+    $ ./voro.native [-p <p-norm>] [-n <amount-of-points>] [-w <window-width>] [-h <window-height>]
 
 # Thirdparty Components #
 
