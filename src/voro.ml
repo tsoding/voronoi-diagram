@@ -28,10 +28,8 @@ module Element2D =
                         string_of_int y;
                         ")"]
 
-    let distance ((x1, y1), _: elt) ((x2, y2), _: elt): int =
-      let dx = x1 - x2 in
-      let dy = y1 - y2 in
-      dx * dx + dy * dy
+    let distance (p1, _: elt) (p2, _: elt): float =
+      VoroGeo.pnorm_distance 1 p1 p2
   end
 
 module Voro2dTree = VoroKdTree.Make(Element2D)

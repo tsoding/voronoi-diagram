@@ -10,7 +10,7 @@ module type ElementType =
     val make: int list -> elt
     val axis_get: int -> elt -> int
     val as_string: elt -> string
-    val distance: elt -> elt -> int
+    val distance: elt -> elt -> float
   end
 
 module type Kd =
