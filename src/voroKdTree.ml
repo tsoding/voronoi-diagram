@@ -10,7 +10,6 @@ module type ElementType =
     val make: int list -> elt
     val axis_get: int -> elt -> int
     val as_string: elt -> string
-    val distance: elt -> elt -> float
   end
 
 module type Kd =
@@ -19,9 +18,10 @@ module type Kd =
       | KdNode of 'a * 'a kdnode * 'a kdnode
       | KdNil
     type elt
+    type elt_distance_function = elt -> elt -> float
     val build : elt list -> elt kdnode
     val search_near_point : distance_function -> point -> seed kdnode -> color option
-    val search_near_point_general : elt -> elt kdnode -> elt option
+    val search_near_point_general : elt_distance_function -> elt -> elt kdnode -> elt option
     val print_tree : elt kdnode -> unit
   end
 
@@ -32,6 +32,7 @@ module Make(Elt: ElementType) =
       | KdNil
 
     type elt = Elt.elt
+    type elt_distance_function = elt -> elt -> float
 
     let k = 2
 
@@ -98,9 +99,12 @@ module Make(Elt: ElementType) =
       then seed1
       else seed2
 
-    let closer_elt (search_elt: elt) (elt1: elt) (elt2: elt): elt =
-      let elt1_distance = Elt.distance search_elt elt1 in
-      let elt2_distance = Elt.distance search_elt elt2 in
+    let closer_elt (distance: elt_distance_function)
+                   (search_elt: elt)
+                   (elt1: elt)
+                   (elt2: elt): elt =
+      let elt1_distance = distance search_elt elt1 in
+      let elt2_distance = distance search_elt elt2 in
       if elt1_distance < elt2_distance
       then elt1
       else elt2
@@ -142,7 +146,8 @@ module Make(Elt: ElementType) =
       in
       BatOption.map snd (search_near_point_impl tree 0)
 
-    let search_near_point_general (search_elt: elt)
+    let search_near_point_general (distance: elt_distance_function)
+                                  (search_elt: elt)
                                   (tree: elt kdnode): elt option =
       let rec search_near_point_general_impl (node: elt kdnode) (depth: int): elt option =
         match node with
@@ -158,19 +163,19 @@ module Make(Elt: ElementType) =
 
            let best_elt =
              search_near_point_general_impl next_branch (depth + 1)
-             |> BatOption.map @@ (closer_elt search_elt pivot_elt)
+             |> BatOption.map @@ (closer_elt distance search_elt pivot_elt)
              |> BatOption.default pivot_elt
            in
 
            let hyper_elt = hyper axis search_elt pivot_elt in
-           let hyper_distance = Elt.distance search_elt hyper_elt in
-           let best_distance = Elt.distance search_elt best_elt in
+           let hyper_distance = distance search_elt hyper_elt in
+           let best_distance = distance search_elt best_elt in
            let probably_better_elt = if hyper_distance < best_distance
                                      then search_near_point_general_impl opposite_branch (depth + 1)
                                      else None in
 
            let result_elt = probably_better_elt
-                            |> BatOption.map (closer_elt search_elt best_elt)
+                            |> BatOption.map (closer_elt distance search_elt best_elt)
                             |> BatOption.default best_elt
            in
 

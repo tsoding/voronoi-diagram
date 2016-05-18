@@ -9,7 +9,6 @@ module type ElementType =
     val make : int list -> elt
     val axis_get: int -> elt -> int
     val as_string: elt -> string
-    val distance: elt -> elt -> float
   end
 
 module type Kd =
@@ -18,9 +17,10 @@ module type Kd =
       | KdNode of 'a * 'a kdnode * 'a kdnode
       | KdNil
     type elt
+    type elt_distance_function = elt -> elt -> float
     val build : elt list -> elt kdnode
     val search_near_point : distance_function -> point -> seed kdnode -> color option
-    val search_near_point_general : elt -> elt kdnode-> elt option
+    val search_near_point_general : elt_distance_function -> elt -> elt kdnode-> elt option
     val print_tree : elt kdnode -> unit
   end
 
