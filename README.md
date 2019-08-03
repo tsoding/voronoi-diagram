@@ -1,3 +1,4 @@
+[![Tsoding](https://img.shields.io/badge/twitch.tv-tsoding-purple?logo=twitch&style=for-the-badge)](https://www.twitch.tv/tsoding)
 [![Stories in Ready](https://badge.waffle.io/tsoding/voronoi-diagram.png?label=ready&title=Ready)](https://waffle.io/tsoding/voronoi-diagram)
 [![Build Status](https://travis-ci.org/tsoding/voronoi-diagram.svg?branch=master)](https://travis-ci.org/tsoding/voronoi-diagram)
 
